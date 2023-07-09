@@ -188,6 +188,29 @@ router.get('/admin/question/list', (req, res) => {
   })
 })
 
+
+// 获取所有问题和结果
+router.get('/admin/questionandresult/list', (req, res) => {
+  const sqlStr = `select * from question ORDER BY sort ASC;`
+  const rdata = {questionList: [], resultList: []}
+  db.query(sqlStr, (err, data) => {
+    if (err) {
+      UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+    } else {
+      rdata.questionList = data
+      db.query(`SELECT * from result WHERE iscomplete=1;`, (err, data) => {
+        if (err) {
+          UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+        } else {
+          rdata.resultList = data
+          UTIL.sendTypeFormat(req, res, '操作成功', 200, rdata)
+        }
+      })
+    }
+  })
+})
+
+
 // 获取渠道类型
 router.get('/admin/result/qudaoList', (req, res) => {
   db.query(`SELECT qudao as title, COUNT(*) AS count
