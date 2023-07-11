@@ -445,7 +445,7 @@ router.post('/admin/home/getCountData', (req, res) => {
   WHERE dt.date >= CURDATE() - INTERVAL 14 DAY
   GROUP BY dt.date;`
   const allQuestion = `SELECT * FROM question;`
-  const allResult = `SELECT * FROM RESULT WHERE iscomplete=1;`
+  const allResult = `SELECT * FROM result WHERE iscomplete=1;`
   const getQudao = `SELECT qudao as type, COUNT(*) AS value
   FROM result
   WHERE iscomplete = 1
