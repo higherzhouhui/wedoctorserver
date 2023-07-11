@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "dev": "node ./server.js",
+    "dev:local": "nodemon ./server.js"
+  },
   "dependencies": {
     "@alicloud/dysmsapi20170525": "^2.0.24",
     "body-parse": "^0.1.0",
