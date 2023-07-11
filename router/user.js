@@ -326,7 +326,10 @@ router.post('/admin/result/autoCreate', (req, res) => {
         if (item.type === 'multiple') {
           const randomLen = Math.floor(Math.random() * item.oplength);
           [...Array(randomLen)].map((ritem, index) => {
-            choose += getRandomOption(item.pro)
+            const rand = getRandomOption(item.pro)
+            if (!choose.includes(rand)) {
+              choose += rand
+            }
             if (index !== randomLen - 1) {
               choose += ','
             }
@@ -347,8 +350,7 @@ router.post('/admin/result/autoCreate', (req, res) => {
         }
       })
       // 处理如果依赖id选项未选，其后应该无选择结果
-      let chooseArray = choose.split('||')
-      chooseArray = Array.from(new Set(chooseArray))
+      const chooseArray = choose.split('||')
       handleResult.forEach(item => {
         const qsArray = qs.split('||')
         const cindex = qsArray.indexOf(item.rid)
