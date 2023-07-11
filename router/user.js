@@ -286,9 +286,28 @@ router.post('/admin/result/autoCreate', (req, res) => {
     return phone
   }
 
+  function generateRandomSortedString(amount) {
+    const values = [];
+    for (let i = 0; i < amount; i++) {
+      values.push(i)
+    }
+    const randomNumberCount = Math.floor(Math.random() * amount);
+    let randomArray = [randomNumberCount];
+
+    while (randomArray.length < randomNumberCount) {
+      const randomIndex = Math.floor(Math.random() * amount);
+      const selectedValue = values[randomIndex]
+      if (randomArray.indexOf(selectedValue) === -1) {
+        randomArray.push(selectedValue);
+      }
+    }
+
+    return randomArray.join(', ');
+  }
+
   function getRandomOption(pro) {
     const randomNumber = Math.random() * 100; // 生成一个0到1之间的随机数
-    const proArray = (pro + `,1,1,1,1,1,1,1`).split(',')
+    const proArray = (pro + `,10,10,10,10,10,10,10`).split(',')
     proArray.map((item, index) => {
       proArray[index] = item * 1
     })
@@ -308,6 +327,12 @@ router.post('/admin/result/autoCreate', (req, res) => {
       return 6
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7]) {
       return 7
+    } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7] + proArray[8]) {
+      return 8
+    } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7] + proArray[8] + proArray[9]) {
+      return 9
+    } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7] + proArray[8] + proArray[9] + proArray[10]) {
+      return 10
     }
   }
 
@@ -324,16 +349,11 @@ router.post('/admin/result/autoCreate', (req, res) => {
           choose += getRandomOption(item.pro)
         }
         if (item.type === 'multiple') {
-          const randomLen = Math.floor(Math.random() * item.oplength);
-          [...Array(randomLen)].map((ritem, index) => {
-            const rand = getRandomOption(item.pro)
-            if (!choose.includes(rand)) {
-              choose += rand
-            }
-            if (index !== randomLen - 1) {
-              choose += ','
-            }
-          })
+          choose += getRandomOption(item.pro) + ','
+          choose +=generateRandomSortedString(Math.floor(Math.random() * item.oplength))
+          const randomArray = choose.split(',')
+          randomArray = randomArray.sort((a, b) => a - b);
+          choose = randomArray.join(',')
         }
         if (index !== result.length - 1) {
           qs += '||'
