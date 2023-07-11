@@ -350,8 +350,8 @@ router.post('/admin/result/autoCreate', (req, res) => {
         }
         if (item.type === 'multiple') {
           choose += getRandomOption(item.pro) + ','
-          choose +=generateRandomSortedString(Math.floor(Math.random() * item.oplength))
-          const randomArray = choose.split(',')
+          choose += generateRandomSortedString(Math.floor(Math.random() * item.oplength))
+          let randomArray = choose.split(',')
           randomArray = randomArray.sort((a, b) => a - b);
           choose = randomArray.join(',')
         }
