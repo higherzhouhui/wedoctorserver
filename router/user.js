@@ -696,7 +696,7 @@ router.post('/admin/upload', upload.single('file'), (req, res) => {
     UTIL.sendTypeFormat(req, res, '上传文件失败，请重试', 500)
     return
   }
-  uploadedFileName = 'http://127.0.0.1:8888/' + uploadedFileName
+  uploadedFileName = 'http://47.96.151.84:8900/' + uploadedFileName
   db.query(`update users set avatar='${uploadedFileName}' where token='${token}'`, (err, data) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
