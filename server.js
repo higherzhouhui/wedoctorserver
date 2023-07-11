@@ -8,10 +8,9 @@ const expressStatic = require('express-static') // 引入静态资源模块
 const fs = require('fs') // 读文件模块
 const userRouter = require('./router/user')
 // var superagent = require('superagent'); //http://visionmedia.github.io/superagent/#response-properties 文档地址
-var dbUrl = 'http://127.0.0.1:8888'; //这里写你的后端api地址
 
 let server = express() // 创建服务器
-let serPort = 8888 // 监听端口
+let serPort = 8900 // 监听端口
 server.use(express.static('public'))
 server.use(bodyParser.urlencoded({
   extended: false
@@ -19,7 +18,7 @@ server.use(bodyParser.urlencoded({
 server.use(bodyParser.json());
 
 server.listen(serPort, () => {
-	console.log("Nodejs Server is opend: 127.0.0.1:8888\n\n");
+	console.log(`Nodejs Server is opend: 127.0.0.1:${serPort}\n\n`);
 })
 
 /******************以下为此服务支持跨域请求********************/
