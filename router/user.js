@@ -324,13 +324,13 @@ router.post('/admin/result/autoCreate', (req, res) => {
           choose += getRandomOption(item.pro)
         }
         if (item.type === 'multiple') {
-          const randomLen = Math.floor(Math.random() * item.oplength)
-          for(let i=0; i < randomLen; i++) {
+          const randomLen = Math.floor(Math.random() * item.oplength);
+          [...Array(randomLen)].map((item, index) => {
             choose += getRandomOption(item.pro)
-            if (i !== randomLen - 1) {
+            if (index !== randomLen - 1) {
               choose += ','
             }
-          }
+          })
         }
         if (index !== result.length - 1) {
           qs += '||'
