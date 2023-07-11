@@ -325,7 +325,7 @@ router.post('/admin/result/autoCreate', (req, res) => {
         }
         if (item.type === 'multiple') {
           const randomLen = Math.floor(Math.random() * item.oplength);
-          [...Array(randomLen)].map((item, index) => {
+          [...Array(randomLen)].map((ritem, index) => {
             choose += getRandomOption(item.pro)
             if (index !== randomLen - 1) {
               choose += ','
