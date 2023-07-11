@@ -286,27 +286,6 @@ router.post('/admin/result/autoCreate', (req, res) => {
     return phone
   }
 
-  function generateRandomSortedString(amount) {
-    const values = [];
-    for (let i = 0; i < amount; i++) {
-      values.push(i)
-    }
-    const randomNumberCount = Math.floor(Math.random() * amount);
-    let randomArray = [randomNumberCount];
-
-    while (randomArray.length < randomNumberCount) {
-      const randomIndex = Math.floor(Math.random() * amount);
-      const selectedValue = values[randomIndex]
-      if (randomArray.indexOf(selectedValue) === -1) {
-        randomArray.push(selectedValue);
-      }
-    }
-
-    randomArray = randomArray.sort((a, b) => a - b);
-
-    return randomArray.join(', ');
-  }
-
   function getRandomOption(pro) {
     const randomNumber = Math.random() * 100; // 生成一个0到1之间的随机数
     const proArray = (pro + `,1,1,1,1,1,1,1`).split(',')
@@ -345,7 +324,9 @@ router.post('/admin/result/autoCreate', (req, res) => {
           choose += getRandomOption(item.pro)
         }
         if (item.type === 'multiple') {
-          choose += getRandomOption(item.pro)
+          for(let i=0; i < Math.floor(Math.random() * item.oplength); i++) {
+            choose += getRandomOption(item.pro)
+          }
         }
         if (index !== result.length - 1) {
           qs += '||'
