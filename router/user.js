@@ -245,7 +245,7 @@ router.get('/admin/result/list', (req, res) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
-      db.query(`SELECT COUNT(*) FROM result WHERE iscomplete=1;`, (err1, data1) => {
+      db.query(`SELECT COUNT(*) FROM result WHERE iscomplete=${body['iscomplete']};`, (err1, data1) => {
         if (err1) {
           UTIL.sendTypeFormat(req, res, err1.sqlMessage, 500)
         } else {
@@ -286,13 +286,13 @@ router.post('/admin/result/autoCreate', (req, res) => {
     return phone
   }
 
-  function generateRandomSortedString(amount) {
+  function generateRandomSortedString(amount, first) {
     const values = [];
     for (let i = 0; i < amount; i++) {
       values.push(i)
     }
     const randomNumberCount = Math.floor(Math.random() * amount);
-    let randomArray = [randomNumberCount];
+    let randomArray = [first];
 
     while (randomArray.length < randomNumberCount) {
       const randomIndex = Math.floor(Math.random() * amount);
@@ -301,6 +301,7 @@ router.post('/admin/result/autoCreate', (req, res) => {
         randomArray.push(selectedValue);
       }
     }
+    randomArray = randomArray.sort((a, b) => a - b);
 
     return randomArray.join(', ');
   }
@@ -312,27 +313,27 @@ router.post('/admin/result/autoCreate', (req, res) => {
       proArray[index] = item * 1
     })
     if (randomNumber < proArray[0]) {
-      return 0
+      return '0'
     } else if (randomNumber < proArray[0] + proArray[1]) {
-      return 1
+      return '1'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2]) {
-      return 2
+      return '2'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3]) {
-      return 3
+      return '3'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4]) {
-      return 4
+      return '4'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5]) {
-      return 5
+      return '5'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6]) {
-      return 6
+      return '6'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7]) {
-      return 7
+      return '7'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7] + proArray[8]) {
-      return 8
+      return '8'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7] + proArray[8] + proArray[9]) {
-      return 9
+      return '9'
     } else if (randomNumber < proArray[0] + proArray[1] + proArray[2] + proArray[3] + proArray[4] + proArray[5] + proArray[6] + proArray[7] + proArray[8] + proArray[9] + proArray[10]) {
-      return 10
+      return '10'
     }
   }
 
@@ -349,11 +350,8 @@ router.post('/admin/result/autoCreate', (req, res) => {
           choose += getRandomOption(item.pro)
         }
         if (item.type === 'multiple') {
-          choose += getRandomOption(item.pro) + ','
-          choose += generateRandomSortedString(Math.floor(Math.random() * item.oplength))
-          let randomArray = choose.split(',')
-          randomArray = randomArray.sort((a, b) => a - b);
-          choose = randomArray.join(',')
+          const first = getRandomOption(item.pro)
+          choose += generateRandomSortedString(Math.floor(Math.random() * item.oplength), first)
         }
         if (index !== result.length - 1) {
           qs += '||'
@@ -370,7 +368,7 @@ router.post('/admin/result/autoCreate', (req, res) => {
         }
       })
       // 处理如果依赖id选项未选，其后应该无选择结果
-      const chooseArray = choose.split('||')
+      const chooseArray = String(choose).split('||')
       handleResult.forEach(item => {
         const qsArray = qs.split('||')
         const cindex = qsArray.indexOf(item.rid)
