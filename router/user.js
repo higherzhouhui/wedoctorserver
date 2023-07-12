@@ -269,8 +269,9 @@ router.post('/admin/result/autoCreate', (req, res) => {
     const randomStartTime = new Date(startTime.getTime() + Math.random() * (endTime.getTime() - startTime.getTime())).getTime();
 
     // 生成结束时间
-    const maxTimeDiff = 10 * 60 * 1000; // 十分钟的毫秒数
-    const randomEndTime = new Date(randomStartTime + Math.random() * maxTimeDiff).getTime();
+    const maxTimeDiff = 3 * 60 * 1000; // 十分钟的毫秒数
+    // 最小时间为1分钟
+    const randomEndTime = new Date(randomStartTime + Math.max(Math.random() * maxTimeDiff, 60 * 1000)).getTime();
     return [randomStartTime, randomEndTime]
   }
   const getPhone = () => {
@@ -437,19 +438,39 @@ router.get('/admin/qudao/getInfo', (req, res) => {
 
 // 获取后台首页统计数据
 router.post('/admin/home/getCountData', (req, res) => {
+  const params = req.query
   const sqlStrTotal = `SELECT COUNT(*) as count FROM result WHERE iscomplete=1;`
   const avgTime = `SELECT AVG(endTime - startTime) AS avgTime FROM result WHERE iscomplete=1;`
-  const dateNumberArray = `SELECT dt.date, COUNT(result.endTime/1000) AS count FROM (
-    SELECT CURDATE() - INTERVAL n DAY AS date FROM (
-      SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
-      SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
-      SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL
-      SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14
-    ) AS nums
-  ) AS dt
-  LEFT JOIN result ON DATE(FROM_UNIXTIME(result.endTime/1000)) = dt.date
-  WHERE dt.date >= CURDATE() - INTERVAL 14 DAY
-  GROUP BY dt.date;`
+  const dateNumberArray = `SELECT DATE_FORMAT(dates.date, '%Y-%m-%d') AS date,
+  COALESCE(result_count.count, 0) AS count
+  FROM (
+  SELECT DATE(FROM_UNIXTIME(startTime / 1000)) AS date
+  FROM result
+  WHERE startTime >= ${params.startTime}   -- 起始时间
+  AND endTime <= ${params.endTime}      -- 结束时间
+  GROUP BY date
+  UNION ALL
+  SELECT DISTINCT
+      DATE(FROM_UNIXTIME(startTime / 1000)) AS date
+  FROM result
+  WHERE NOT EXISTS (
+  SELECT 1
+  FROM result
+  WHERE DATE(FROM_UNIXTIME(startTime / 1000)) = DATE(FROM_UNIXTIME(startTime / 1000))   -- 自连接
+  AND startTime >= ${params.startTime}   -- 起始时间
+  AND endTime <= ${params.endTime}      -- 结束时间
+  )
+  ) AS dates
+  LEFT JOIN (
+  SELECT DATE(FROM_UNIXTIME(startTime / 1000)) AS date,
+      COUNT(*) AS count
+  FROM result
+  WHERE startTime >= '${params.startTime}'   -- 起始时间
+  AND endTime <= '${params.endTime}'      -- 结束时间
+  GROUP BY date
+  ) AS result_count ON dates.date = result_count.date
+  ORDER BY dates.date;`
+
   const allQuestion = `SELECT * FROM question;`
   const allResult = `SELECT * FROM result WHERE iscomplete=1;`
   const getQudao = `SELECT qudao as type, COUNT(*) AS value
