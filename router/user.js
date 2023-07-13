@@ -724,7 +724,7 @@ router.post('/admin/user/change', (req, res) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
-      if (data.length && data[0].role == '0') {
+      if (data.length && data[0].role == '0' || data[0].role == '1') {
         const body = req.body
         let columns = ''
         Object.keys(body).forEach((key, index) => {
@@ -759,17 +759,7 @@ router.post('/admin/user/delete', (req, res) => {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
       if (data.length && data[0].role == '0') {
-        const body = req.body
-        let columns = ''
-        Object.keys(body).forEach((key, index) => {
-          if (key !== 'id') {
-            columns += `${key}='${body[key]}'`;
-            if (index !== Object.keys(body).length - 1) {
-              columns += ','
-            }
-          }
-        })
-        const sqlStr = `update users set ${columns} where id=${body.id};`
+        const sqlStr = `delete from users where id=${body.id};`
         db.query(sqlStr, (err, data) => {
           if (err) {
             UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
