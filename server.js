@@ -31,7 +31,7 @@ server.all('*',function(req, res, next) {//处理跨域
   res.header('X-Response-Time', '50000ms');
 	res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Access-Token');
 
   // 检查是否是预检请求（OPTIONS请求）
   if (req.method === 'OPTIONS') {
