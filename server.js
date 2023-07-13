@@ -8,9 +8,13 @@ const expressStatic = require('express-static') // 引入静态资源模块
 const fs = require('fs') // 读文件模块
 const userRouter = require('./router/user')
 // var superagent = require('superagent'); //http://visionmedia.github.io/superagent/#response-properties 文档地址
+const cors = require('cors');
+
+// Enable CORS
 
 let server = express() // 创建服务器
 let serPort = 8900 // 监听端口
+server.use(cors());
 server.use(express.static('public'))
 server.use(bodyParser.urlencoded({
   extended: false

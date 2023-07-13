@@ -884,7 +884,7 @@ router.post('/account/result/login', (req, res) => {
           }
         }
       } else {
-        UTIL.sendTypeFormat(req, res, '验证码失效，请稍后重发', 500, {})
+        UTIL.sendTypeFormat(req, res, '验证码失效，请重发', 500, {})
       }
     }
   })
