@@ -720,7 +720,7 @@ router.post('/admin/user/update', (req, res) => {
 router.post('/admin/user/change', (req, res) => {
   const headers = req.headers
   const token = headers['access-token']
-  db.query(`SELECT * from user where token='${token}';`, (err, data) => {
+  db.query(`SELECT * from users where token='${token}';`, (err, data) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
@@ -754,7 +754,7 @@ router.post('/admin/user/change', (req, res) => {
 router.post('/admin/user/delete', (req, res) => {
   const headers = req.headers
   const token = headers['access-token']
-  db.query(`SELECT * from user where token='${token}';`, (err, data) => {
+  db.query(`SELECT * from users where token='${token}';`, (err, data) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
