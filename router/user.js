@@ -715,6 +715,76 @@ router.post('/admin/user/update', (req, res) => {
   })
 })
 
+
+// 修改用户信息
+router.post('/admin/user/change', (req, res) => {
+  const headers = req.headers
+  const token = headers['access-token']
+  db.query(`SELECT * from user where token='${token}';`, (err, data) => {
+    if (err) {
+      UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+    } else {
+      if (data.length && data[0].role == '0') {
+        const body = req.body
+        let columns = ''
+        Object.keys(body).forEach((key, index) => {
+          if (key !== 'id') {
+            columns += `${key}='${body[key]}'`;
+            if (index !== Object.keys(body).length - 1) {
+              columns += ','
+            }
+          }
+        })
+        const sqlStr = `update users set ${columns} where id=${body.id};`
+        db.query(sqlStr, (err, data) => {
+          if (err) {
+            UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+          } else {
+            UTIL.sendTypeFormat(req, res, '操作成功', 200)
+          }
+        })
+      } else {
+        UTIL.sendTypeFormat(req, res, '无操作权限', 500)
+      }
+    }
+  })
+})
+
+// 修改用户信息
+router.post('/admin/user/delete', (req, res) => {
+  const headers = req.headers
+  const token = headers['access-token']
+  db.query(`SELECT * from user where token='${token}';`, (err, data) => {
+    if (err) {
+      UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+    } else {
+      if (data.length && data[0].role == '0') {
+        const body = req.body
+        let columns = ''
+        Object.keys(body).forEach((key, index) => {
+          if (key !== 'id') {
+            columns += `${key}='${body[key]}'`;
+            if (index !== Object.keys(body).length - 1) {
+              columns += ','
+            }
+          }
+        })
+        const sqlStr = `update users set ${columns} where id=${body.id};`
+        db.query(sqlStr, (err, data) => {
+          if (err) {
+            UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+          } else {
+            UTIL.sendTypeFormat(req, res, '操作成功', 200)
+          }
+        })
+      } else {
+        UTIL.sendTypeFormat(req, res, '无操作权限', 500)
+      }
+    }
+  })
+})
+
+
 // 处理文件上传
 router.post('/admin/upload', upload.single('file'), (req, res) => {
   const headers = req.headers
