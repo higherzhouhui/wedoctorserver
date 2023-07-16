@@ -269,7 +269,7 @@ router.post('/admin/result/autoCreate', (req, res) => {
     const randomStartTime = new Date(startTime.getTime() + Math.random() * (endTime.getTime() - startTime.getTime())).getTime();
 
     // 生成结束时间
-    const maxTimeDiff = 5 * 60 * 1000; // 十分钟的毫秒数
+    const maxTimeDiff = 8 * 60 * 1000; // 十分钟的毫秒数
     // 最小时间为1分钟
     const randomEndTime = new Date(randomStartTime + Math.random() * maxTimeDiff).getTime();
     return [randomStartTime, randomEndTime]
