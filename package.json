@@ -1,7 +1,8 @@
 {
   "scripts": {
     "dev": "node ./server.js",
-    "dev:local": "nodemon ./server.js"
+    "dev:local": "nodemon ./server.js",
+    "pm2": "pm2 start npm --name 'wedoctorserver' -- dev"
   },
   "dependencies": {
     "@alicloud/darabonba-env": "^1.0.0",
