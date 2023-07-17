@@ -298,7 +298,7 @@ router.post('/admin/result/autoCreate', (req, res) => {
     while (randomArray.length < randomNumberCount) {
       const randomIndex = Math.floor(Math.random() * amount);
       const selectedValue = values[randomIndex]
-      if (randomArray.indexOf(selectedValue) === -1) {
+      if (randomArray.indexOf(selectedValue) === -1 && randomArray.indexOf(selectedValue * 1) === -1) {
         randomArray.push(selectedValue);
       }
     }
