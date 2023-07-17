@@ -269,9 +269,11 @@ router.post('/admin/result/autoCreate', (req, res) => {
     const randomStartTime = new Date(startTime.getTime() + Math.random() * (endTime.getTime() - startTime.getTime())).getTime();
 
     // 生成结束时间
-    const maxTimeDiff = 8 * 60 * 1000; // 十分钟的毫秒数
+    const maxTimeDiff = 3 * 60 * 1000; // 十分钟的毫秒数
+    
     // 最小时间为1分钟
-    const randomEndTime = new Date(randomStartTime + Math.random() * maxTimeDiff).getTime();
+    const minTimeDiff = 60 * 1000
+    const randomEndTime = new Date(randomStartTime + Math.random() * maxTimeDiff + minTimeDiff).getTime();
     return [randomStartTime, randomEndTime]
   }
   const getPhone = () => {
@@ -292,13 +294,14 @@ router.post('/admin/result/autoCreate', (req, res) => {
     for (let i = 0; i < amount; i++) {
       values.push(i)
     }
-    const randomNumberCount = Math.floor(Math.random() * amount);
-    let randomArray = [first];
+    const randomNumberCount = Math.floor(Math.random() * amount) + 1;
+    const firstVal = Number(first)
+    let randomArray = [firstVal];
 
     while (randomArray.length < randomNumberCount) {
       const randomIndex = Math.floor(Math.random() * amount);
       const selectedValue = values[randomIndex]
-      if (randomArray.indexOf(selectedValue) === -1 && randomArray.indexOf(selectedValue * 1) === -1) {
+      if (randomArray.indexOf(selectedValue) === -1) {
         randomArray.push(selectedValue);
       }
     }
