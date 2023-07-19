@@ -193,11 +193,13 @@ router.get('/admin/question/list', (req, res) => {
 router.post('/admin/questionandresult/list', (req, res) => {
   const sqlStr = `select * from question ORDER BY sort ASC;`
   const rdata = {questionList: [], resultList: []}
-  const time = req.body.time
+  const {time, qudao} = req.body
   let whereStr = ''
-  // 3233245
   if (time && time[0] && time[1]) {
     whereStr = `AND startTime >= ${time[0]} AND endTime <= ${time[1]}`
+  }
+  if (qudao) {
+    whereStr += ` AND qudao='${qudao}'`
   }
   db.query(sqlStr, (err, data) => {
     if (err) {
