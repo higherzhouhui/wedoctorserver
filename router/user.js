@@ -190,15 +190,21 @@ router.get('/admin/question/list', (req, res) => {
 
 
 // 获取所有问题和结果
-router.get('/admin/questionandresult/list', (req, res) => {
+router.post('/admin/questionandresult/list', (req, res) => {
   const sqlStr = `select * from question ORDER BY sort ASC;`
   const rdata = {questionList: [], resultList: []}
+  const time = req.body.time
+  let whereStr = ''
+  // 3233245
+  if (time && time[0] && time[1]) {
+    whereStr = `AND startTime >= ${time[0]} AND endTime <= ${time[1]}`
+  }
   db.query(sqlStr, (err, data) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
       rdata.questionList = data
-      db.query(`SELECT * from result WHERE iscomplete=1;`, (err, data) => {
+      db.query(`SELECT * from result WHERE iscomplete=1 ${whereStr};`, (err, data) => {
         if (err) {
           UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
         } else {
@@ -233,7 +239,13 @@ router.get('/admin/result/list', (req, res) => {
   body['iscomplete'] = body['iscomplete'] ? body['iscomplete'] : 1
   Object.keys(body).forEach(key => {
     if (key !== 'pageNum' && key !== 'pageSize' && key !== 'current' && body[key]) {
-      whereSql += `${key}='${body[key]}' AND `
+      if (key === 'startTime') {
+        whereSql += `${key}>='${body[key]}' AND `
+      } else if (key === 'endTime') {
+        whereSql += `${key}<='${body[key]}' AND `
+      } else {
+        whereSql += `${key}='${body[key]}' AND `
+      }
     }
   })
   let whereArr = whereSql.split('AND').filter(item => item !== ' ').join('AND')
@@ -245,7 +257,7 @@ router.get('/admin/result/list', (req, res) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
-      db.query(`SELECT COUNT(*) FROM result WHERE iscomplete=${body['iscomplete']};`, (err1, data1) => {
+      db.query(`SELECT COUNT(*) FROM result ${whereSql};`, (err1, data1) => {
         if (err1) {
           UTIL.sendTypeFormat(req, res, err1.sqlMessage, 500)
         } else {
@@ -269,10 +281,10 @@ router.post('/admin/result/autoCreate', (req, res) => {
     const randomStartTime = new Date(startTime.getTime() + Math.random() * (endTime.getTime() - startTime.getTime())).getTime();
 
     // 生成结束时间
-    const maxTimeDiff = 3 * 60 * 1000; // 十分钟的毫秒数
+    const maxTimeDiff = 10 * 60 * 1000; // 十分钟的毫秒数
     
     // 最小时间为1分钟
-    const minTimeDiff = 60 * 1000
+    const minTimeDiff = 20 * 60 * 1000
     const randomEndTime = new Date(randomStartTime + Math.random() * maxTimeDiff + minTimeDiff).getTime();
     return [randomStartTime, randomEndTime]
   }
