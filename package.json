@@ -2,7 +2,7 @@
   "scripts": {
     "dev": "node ./server.js",
     "dev:local": "nodemon ./server.js",
-    "pm2": "pm2 node ./server.js --name 'wedoctorserver'"
+    "pm2": "pm2 start ./server.js --name 'wedoctorserver'"
 
   },
   "dependencies": {
