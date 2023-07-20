@@ -893,7 +893,7 @@ router.post('/account/result/getCode', (req, res) => {
   }
   const randCode = generateSixDigitRandomNumber()
   try {
-    Client.default.main([req.body.phone, '消化领域疾病患者临床治疗情况数据收集表', `SMS_461975848`, `{"code":"${randCode}"}`]).then(() => {
+    Client.default.main([req.body.phone, 'We收集', `SMS_461975848`, `{"code":"${randCode}"}`]).then(() => {
 
     }).catch(err => {
       console.log(err)
