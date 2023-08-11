@@ -2,8 +2,9 @@
   "scripts": {
     "dev": "node ./server.js",
     "dev:local": "nodemon ./server.js",
-    "pm2": "pm2 start ./server.js --name 'dynamicWeb'",
-    "pm": "pm2 start npm --name 'bizhi' -- start"
+    "pm": "pm2 start ./server.js --name 'dynamicWeb'",
+    "start": "node ./server.js",
+    "pm2": "pm2 start npm --name 'bizhiServer' -- start"
   },
   "dependencies": {
     "@alicloud/darabonba-env": "^1.0.0",
