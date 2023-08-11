@@ -38,7 +38,7 @@ const router = express.Router()
 
 let db = mysql.createPool({
   host: '127.0.0.1', user: 'root', port: 3306,
-  password: '123456', database: 'questionsys'
+  password: '123456', database: 'dynamicsys'
 })  // 创建本地连接池
 
 db.getConnection((err, connection) => {
@@ -54,38 +54,95 @@ db.getConnection((err, connection) => {
 })
 
 // 登陆
-router.post('/admin/administer/login', (req, res) => {
+router.post('/api/login', (req, res) => {
   const body = req.body
-  db.query(`SELECT * FROM users WHERE account='${body.account}';`, (err, data) => {
+  const {shebei, lang, comeTime, uuid} = body
+  const queryIsCz = `SELECT * FROM tongji where uuid='${uuid}'`;
+  db.query(queryIsCz, (err, data) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
-    } else {
-      if (data.length) {
-        const columnObj = data[0]
-        if (columnObj.password === body.password) {
-          const resData = {
-            ...columnObj,
-            token: md5(body.account + body.password + Math.round(Math.random() * 100)),
-            lastlogin: moment().format('YYYY-MM-DD HH:mm:ss')
-          }
-          db.query(`update users set token='${resData.token}',lastlogin='${resData.lastlogin}' where account='${body.account}';`, (err, data) => {
-            if (err, data) {
-              if (err) {
-                UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
-              } else {
-                UTIL.sendTypeFormat(req, res, '操作成功', 200, { token: resData.token })
-              }
-            }
-          })
+    } else if (data.length) {
+      const obj = data[0]
+      const insertOrUpdate = `update tongji set comeTime=${comeTime}, loginNum=${obj.loginNum + 1} where uuid='${uuid}'`
+      db.query(insertOrUpdate, (err, data) => {
+        if (err) {
+          UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
         } else {
-          UTIL.sendTypeFormat(req, res, '账号或者密码错误', 500, [])
+          UTIL.sendTypeFormat(req, res, '操作成功', 200, {uuid})
         }
-      } else {
-        UTIL.sendTypeFormat(req, res, '该账号不存在', 500, data)
-      }
+      })
+    } else {
+      const insertOrUpdate = `INSERT INTO tongji (shebei, lang, comeTime, uuid, clickNum, loginNum) VALUES ('${shebei}', '${lang}', ${comeTime}, '${uuid}', 0, 1);`
+      db.query(insertOrUpdate, (err, data) => {
+        if (err) {
+          UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+        } else {
+          UTIL.sendTypeFormat(req, res, '操作成功', 200, {uuid})
+        }
+      })
     }
   })
 })
+
+// 更新离开时间
+router.post('/api/loginOut', (req, res) => {
+  const body = req.body
+  const {uuid, leaveTime} = body
+  const sqlStr = `update tongji set leaveTime=${leaveTime} where uuid='${uuid}';`
+  db.query(sqlStr, (err, data) => {
+    if (err) {
+      UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+    } else {
+      UTIL.sendTypeFormat(req, res, '操作成功', 200, {uuid})
+    }
+  })
+})
+
+// 点击下载按钮
+router.post('/api/clickDown', (req, res) => {
+  const body = req.body
+  const {uuid} = body
+  const queryIsCz = `SELECT * FROM tongji where uuid='${uuid}'`;
+  db.query(queryIsCz, (err, data) => {
+    if (err) {
+      UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+    } else if (data.length) {
+      const obj = data[0]
+      const insertOrUpdate = `update tongji set clickNum=${obj.clickNum + 1} where uuid='${uuid}'`
+      db.query(insertOrUpdate, (err, data) => {
+        if (err) {
+          UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+        } else {
+          UTIL.sendTypeFormat(req, res, '操作成功', 200, {uuid})
+        }
+      })
+    }
+  })
+})
+
+
+// 获取统计数据
+router.get('/api/getData', (req, res) => {
+    const body = req.query
+    const {startTime, endTime, pageNum, pageSize} = body
+    const start = pageNum == 1 ? 0 : (pageNum - 1) * 10 + 1;
+    const sqlStr = `SELECT * FROM tongji WHERE comeTime >= ${startTime} AND comeTime <= ${endTime} ORDER BY comeTime ASC LIMIT ${start}, ${pageSize}; `
+    db.query(sqlStr, (err, data) => {
+      if (err) {
+        UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+      } else {
+        db.query(`SELECT COUNT(*) FROM tongji;`, (err1, data1) => {
+          if (err1) {
+            UTIL.sendTypeFormat(req, res, err1.sqlMessage, 500)
+          } else {
+            UTIL.sendTypeFormat(req, res, '操作成功', 200, { list: data, pageNum: body.pageNum * 1, totalSize: data1[0]['COUNT(*)'] })
+          }
+        })
+      }
+    })
+})
+
+
 
 // 获取个人信息
 router.get('/admin/administer/info', (req, res) => {
