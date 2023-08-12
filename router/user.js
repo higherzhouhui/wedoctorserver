@@ -125,7 +125,7 @@ router.post('/api/clickDown', (req, res) => {
 router.get('/api/getData', (req, res) => {
     const body = req.query
     const {startTime, endTime, pageNum, pageSize} = body
-    const 12 = pageNum == 1 ? 0 : (pageNum - 1) * 10;
+    const start = pageNum == 1 ? 0 : (pageNum - 1) * 10;
     const sqlStr = `SELECT * FROM tongji WHERE comeTime >= ${startTime} AND comeTime <= ${endTime} ORDER BY comeTime ASC LIMIT ${start}, ${pageSize}; `
     db.query(sqlStr, (err, data) => {
       if (err) {
