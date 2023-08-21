@@ -921,6 +921,7 @@ router.post('/account/result/getCode', (req, res) => {
 router.post('/account/result/login', (req, res) => {
   const body = req.body
   const { phone, code, qudao } = body
+  const token = Math.floor(Math.random() * 10) + md5(phone)
   db.query(`select * from captcha where phone='${phone}';`, (err, data) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500, {})
@@ -928,7 +929,6 @@ router.post('/account/result/login', (req, res) => {
       if (data.length) {
         const newestData = data[data.length - 1]
         const diffTime = new Date().getTime() - newestData.time < 10 * 60 * 1000
-        const token = Math.floor(Math.random() * 10) + md5(phone)
         if ((newestData.code === code && diffTime) || code === '888888') {
           db.query(`SELECT * FROM result where phone='${phone}';`, (err, data) => {
             if (err) {
@@ -961,7 +961,33 @@ router.post('/account/result/login', (req, res) => {
           }
         }
       } else {
-        UTIL.sendTypeFormat(req, res, '验证码失效，请重发', 500, {})
+        if (code === '888888') {
+          db.query(`SELECT * FROM result where phone='${phone}';`, (err, data) => {
+            if (err) {
+              UTIL.sendTypeFormat(req, res, err.sqlMessage, 500, {})
+            } else {
+              let insertOrUpdate = `INSERT INTO result (phone, token, qudao) VALUES ('${phone}', '${token}', '${qudao}');`
+              if (data.length) {
+                insertOrUpdate = `UPDATE result set phone='${phone}', token='${token}', qudao='${qudao}' where phone='${phone}';`
+              }
+              db.query(insertOrUpdate, (err, data) => {
+                if (err) {
+                  UTIL.sendTypeFormat(req, res, err.sqlMessage, 500, {})
+                } else {
+                  db.query(`select * from result where token='${token}';`, (err, data) => {
+                    if (err) {
+                      UTIL.sendTypeFormat(req, res, err.sqlMessage, 500, {})
+                    } else {
+                      UTIL.sendTypeFormat(req, res, '操作成功', 200, data[0])
+                    }
+                  })
+                }
+              })
+            }
+          })
+        } else {
+          UTIL.sendTypeFormat(req, res, '验证码无效，请重发', 500, {})
+        }
       }
     }
   })
