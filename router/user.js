@@ -7,6 +7,7 @@ const UTIL = require('../utils/common')
 const md5 = require('md5')
 const moment = require('moment')
 const Client = require('../sms.js')
+const XLSX = require('xlsx')
 
 const imagesDirectory = 'public';
 const imageDir = '/' + imagesDirectory + '/';
@@ -272,8 +273,13 @@ router.get('/admin/result/list', (req, res) => {
 
 // 获取问卷结果列表
 router.get('/admin/result/export', (req, res) => {
+  const sheetData = []
+  let questionList = []
+  const header = ['手机号', '渠道号', '开始时间', '结束时间', '答题时长']
+  const qsList = []
+  const listStyle = ['A','B','C','D','E','F','G','H','I','J','K','L']
+
   const body = req.query
-  const start = body.pageNum == 1 ? 0 : (body.pageNum - 1) * 10 + 1;
   let whereSql = ''
   body['iscomplete'] = body['iscomplete'] ? body['iscomplete'] : 1
   Object.keys(body).forEach(key => {
@@ -291,20 +297,69 @@ router.get('/admin/result/export', (req, res) => {
   if (whereArr) {
     whereSql = `WHERE ${whereArr}`
   }
-  const sqlStr = `select * from result ${whereSql} ORDER BY endTime DESC limit ${start},${body.pageSize};`
-  db.query(sqlStr, (err, data) => {
+  const sqlStr = `select * from result ${whereSql} ORDER BY endTime DESC;`
+
+  db.query(`select * from question ORDER BY sort ASC;`, (err, data) => {
     if (err) {
       UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
     } else {
-      db.query(`SELECT COUNT(*) FROM result ${whereSql};`, (err1, data1) => {
-        if (err1) {
-          UTIL.sendTypeFormat(req, res, err1.sqlMessage, 500)
+      questionList = data
+      data.forEach((item, index) => {
+        const qsOneArray = item.options.split('||')
+        qsList.push(qsOneArray)
+        let title = `${index + 1}、${item.qs}`
+        if (item.type === 'single') {
+          title += '（单选）'
         } else {
-          UTIL.sendTypeFormat(req, res, '操作成功', 200, { list: data, pageNum: body.pageNum * 1, totalSize: data1[0]['COUNT(*)'] })
+          title += '（多选）'
+        }
+        header.push(title)
+      })
+      sheetData.push(header)
+      db.query(sqlStr, (err, data) => {
+        if (err) {
+          UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+        } else {
+          // 问题顺序默认是相同的；如果改了顺序这里要做变化
+          data.forEach((item, index) => {
+            const column = [
+              item.phone, 
+              item.qudao, 
+              moment(item.startTime).format('YYYY-MM-DD HH:mm:ss'), 
+              moment(item.endTime).format('YYYY-MM-DD HH:mm:ss'),
+              UTIL.formatTime((item.endTime - item.startTime) / 1000),
+            ]
+            const chooseArray = item.choose.split('||') || ['']
+            chooseArray.forEach((citem, cindex) => {
+              let anser = ''
+              const anserArray = citem.split(',') || []
+              anserArray.forEach((ccitem, ccindex) => {
+                anser += `${listStyle[ccitem * 1]}.${qsList[cindex][ccitem * 1]}`
+                if (anserArray.length !== ccindex + 1) {
+                  anser += ','
+                }
+              })
+              column.push(anser)
+            })
+            sheetData.push(column)
+          })
+          const workbook = XLSX.utils.book_new();
+          const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+          XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+          const filename = '数据详情.xlsx';
+          XLSX.writeFile(workbook, filename)
+          fs.rename('./数据详情.xlsx', './public/数据详情.xlsx', (err) => {
+            if (err) {
+              UTIL.sendTypeFormat(req, res, err, 500)
+            } else {
+              UTIL.sendTypeFormat(req, res, '操作成功', 200, { url: 'http://47.96.151.84:8900/数据详情.xlsx' })
+            }
+          })
         }
       })
     }
   })
+
 })
 
 
