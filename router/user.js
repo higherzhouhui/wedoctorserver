@@ -236,6 +236,43 @@ router.get('/admin/result/qudaoList', (req, res) => {
 // 获取问卷结果列表
 router.get('/admin/result/list', (req, res) => {
   const body = req.query
+  const start = body.pageNum == 1 ? 0 : (body.pageNum - 1) * body.pageSize + 1;
+  let whereSql = ''
+  body['iscomplete'] = body['iscomplete'] ? body['iscomplete'] : 1
+  Object.keys(body).forEach(key => {
+    if (key !== 'pageNum' && key !== 'pageSize' && key !== 'current' && body[key]) {
+      if (key === 'startTime') {
+        whereSql += `${key}>='${body[key]}' AND `
+      } else if (key === 'endTime') {
+        whereSql += `${key}<='${body[key]}' AND `
+      } else {
+        whereSql += `${key}='${body[key]}' AND `
+      }
+    }
+  })
+  let whereArr = whereSql.split('AND').filter(item => item !== ' ').join('AND')
+  if (whereArr) {
+    whereSql = `WHERE ${whereArr}`
+  }
+  const sqlStr = `select * from result ${whereSql} ORDER BY endTime DESC limit ${start},${body.pageSize};`
+  db.query(sqlStr, (err, data) => {
+    if (err) {
+      UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
+    } else {
+      db.query(`SELECT COUNT(*) FROM result ${whereSql};`, (err1, data1) => {
+        if (err1) {
+          UTIL.sendTypeFormat(req, res, err1.sqlMessage, 500)
+        } else {
+          UTIL.sendTypeFormat(req, res, '操作成功', 200, { list: data, pageNum: body.pageNum * 1, totalSize: data1[0]['COUNT(*)'] })
+        }
+      })
+    }
+  })
+})
+
+// 获取问卷结果列表
+router.get('/admin/result/export', (req, res) => {
+  const body = req.query
   const start = body.pageNum == 1 ? 0 : (body.pageNum - 1) * 10 + 1;
   let whereSql = ''
   body['iscomplete'] = body['iscomplete'] ? body['iscomplete'] : 1
@@ -269,6 +306,7 @@ router.get('/admin/result/list', (req, res) => {
     }
   })
 })
+
 
 router.post('/admin/result/autoCreate', (req, res) => {
   const { result, amount, time, qudao } = req.body
