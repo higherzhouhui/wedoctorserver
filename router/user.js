@@ -197,7 +197,7 @@ router.post('/admin/questionandresult/list', (req, res) => {
   const {time, qudao} = req.body
   let whereStr = ''
   if (time && time[0] && time[1]) {
-    whereStr = `AND startTime >= ${time[0]} AND endTime <= ${time[1]}`
+    whereStr = `AND startTime >= ${time[0]} AND endTime < ${time[1]}`
   }
   if (qudao) {
     whereStr += ` AND qudao='${qudao}'`
@@ -245,7 +245,7 @@ router.get('/admin/result/list', (req, res) => {
       if (key === 'startTime') {
         whereSql += `${key}>='${body[key]}' AND `
       } else if (key === 'endTime') {
-        whereSql += `${key}<='${body[key]}' AND `
+        whereSql += `${key}<'${body[key]}' AND `
       } else {
         whereSql += `${key}='${body[key]}' AND `
       }
@@ -287,7 +287,7 @@ router.get('/admin/result/export', (req, res) => {
       if (key === 'startTime') {
         whereSql += `${key}>='${body[key]}' AND `
       } else if (key === 'endTime') {
-        whereSql += `${key}<='${body[key]}' AND `
+        whereSql += `${key}<'${body[key]}' AND `
       } else {
         whereSql += `${key}='${body[key]}' AND `
       }
@@ -557,7 +557,7 @@ router.post('/admin/home/getCountData', (req, res) => {
   SELECT DATE(FROM_UNIXTIME(startTime / 1000)) AS date
   FROM result
   WHERE startTime >= ${params.startTime}   -- 起始时间
-  AND endTime <= ${params.endTime}      -- 结束时间
+  AND endTime < ${params.endTime}      -- 结束时间
   GROUP BY date
   UNION ALL
   SELECT DISTINCT
@@ -568,7 +568,7 @@ router.post('/admin/home/getCountData', (req, res) => {
   FROM result
   WHERE DATE(FROM_UNIXTIME(startTime / 1000)) = DATE(FROM_UNIXTIME(startTime / 1000))   -- 自连接
   AND startTime >= ${params.startTime}   -- 起始时间
-  AND endTime <= ${params.endTime}      -- 结束时间
+  AND endTime < ${params.endTime}      -- 结束时间
   )
   ) AS dates
   LEFT JOIN (
@@ -576,7 +576,7 @@ router.post('/admin/home/getCountData', (req, res) => {
       COUNT(*) AS count
   FROM result
   WHERE startTime >= '${params.startTime}'   -- 起始时间
-  AND endTime <= '${params.endTime}'      -- 结束时间
+  AND endTime < '${params.endTime}'      -- 结束时间
   GROUP BY date
   ) AS result_count ON dates.date = result_count.date
   ORDER BY dates.date;`
