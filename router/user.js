@@ -131,11 +131,18 @@ router.get('/api/getData', (req, res) => {
       if (err) {
         UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
       } else {
-        db.query(`SELECT COUNT(*) FROM tongji;`, (err1, data1) => {
+        db.query(`SELECT * FROM tongji;`, (err1, data1) => {
           if (err1) {
             UTIL.sendTypeFormat(req, res, err1.sqlMessage, 500)
           } else {
-            UTIL.sendTypeFormat(req, res, '操作成功', 200, { list: data, pageNum: body.pageNum * 1, totalSize: data1[0]['COUNT(*)'] })
+            const totalSize = data1.length
+            let totalClick = 0
+            let totalLogin = 0
+            data1.forEach(item => {
+              totalClick += item.clickNum
+              totalLogin += item.loginNum
+            })
+            UTIL.sendTypeFormat(req, res, '操作成功', 200, { list: data, pageNum: body.pageNum * 1, totalSize, totalClick, totalLogin })
           }
         })
       }
