@@ -13,7 +13,7 @@ const cors = require('cors');
 // Enable CORS
 
 let server = express() // 创建服务器
-let serPort = 8900 // 监听端口
+let serPort = 1210 // 监听端口
 server.use(cors());
 server.use(express.static('public'))
 server.use(bodyParser.urlencoded({

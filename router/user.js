@@ -126,7 +126,7 @@ router.get('/api/getData', (req, res) => {
     const body = req.query
     const {startTime, endTime, pageNum, pageSize} = body
     const start = pageNum == 1 ? 0 : (pageNum - 1) * pageSize;
-    const sqlStr = `SELECT * FROM tongji WHERE comeTime >= ${startTime} AND comeTime <= ${endTime} ORDER BY comeTime ASC LIMIT ${start}, ${pageSize}; `
+    const sqlStr = `SELECT * FROM tongji WHERE comeTime >= ${startTime} AND comeTime <= ${endTime} ORDER BY comeTime DESC LIMIT ${start}, ${pageSize}; `
     db.query(sqlStr, (err, data) => {
       if (err) {
         UTIL.sendTypeFormat(req, res, err.sqlMessage, 500)
